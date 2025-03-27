@@ -432,7 +432,7 @@
                 if(localStorage.getItem('partidaId')){
                     existePartidaLocalStorage();
                 }else{
-                    window.location.href = '/pages/admin';
+                    window.location.href = 'pages/admin';
                 }
 
                 async function existePartidaLocalStorage(){
@@ -462,7 +462,7 @@
                             }
                             document.getElementById('results-table-body').innerHTML += body;
                         }else{
-                            window.location.href = '/pages/admin';
+                            window.location.href = 'pages/admin';
                         }
                     }
                 }

@@ -253,7 +253,7 @@
                         localStorage.removeItem('numJugador');
                         localStorage.removeItem('preguntas');
                         localStorage.removeItem('questionOrder');
-                        window.location.href = '/';
+                        window.location.reload();
                     }
                 }
 
@@ -302,8 +302,8 @@
                                 localStorage.removeItem('numJugador');
                                 localStorage.removeItem('preguntas');
                                 localStorage.removeItem('questionOrder');
-                                window.location.href = '/';
-                            }, 1500);
+                                window.location.reload();
+                            }, 2000);
                         }
                     });
                 }
