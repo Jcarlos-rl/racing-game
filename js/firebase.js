@@ -13,4 +13,4 @@ const firebaseConfig = {
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 
-const BASE_URL = 'racing-game/';
+const BASE_URL = '/racing-game/';
