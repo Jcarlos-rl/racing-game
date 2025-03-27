@@ -13,4 +13,4 @@ const firebaseConfig = {
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 
-const BASE_URL = window.location.origin + window.location.pathname.replace(/\/[^/]*$/, "/");
+const BASE_URL = 'racing-game/';
