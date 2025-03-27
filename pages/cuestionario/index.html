@@ -226,7 +226,7 @@
                 if(localStorage.getItem('preguntas')){
                     existePartidaLocalStorage();
                 }else{
-                    window.location.href = '/';
+                    window.location.href = BASE_URL;
                 }
 
                 async function existePartidaLocalStorage(){
@@ -253,7 +253,7 @@
                         localStorage.removeItem('numJugador');
                         localStorage.removeItem('preguntas');
                         localStorage.removeItem('questionOrder');
-                        window.location.reload();
+                        window.location.href = BASE_URL;
                     }
                 }
 
@@ -302,7 +302,7 @@
                                 localStorage.removeItem('numJugador');
                                 localStorage.removeItem('preguntas');
                                 localStorage.removeItem('questionOrder');
-                                window.location.reload();
+                                window.location.href = BASE_URL;
                             }, 2000);
                         }
                     });

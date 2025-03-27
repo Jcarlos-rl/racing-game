@@ -468,7 +468,7 @@
                                 startButton.style.display = 'none';
                                 winnerMessage.textContent = `¡Carrera finalizada!`;
                                 setTimeout(() => {
-                                    window.location.href = 'pages/resultado';
+                                    window.location.href = BASE_URL + 'pages/resultado';
                                 }, 2500);
                             }
                         }
@@ -611,7 +611,7 @@
                     winnerMessage.textContent = `¡Carrera finalizada!`;
                     localStorage.setItem('isRacing', false);
                     setTimeout(() => {
-                        window.location.href = 'pages/resultado';
+                        window.location.href = BASE_URL + 'pages/resultado';
                     }, 2500);
 
                     // Stop running animation
