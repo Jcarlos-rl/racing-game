@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Carrera | Unirse a partida</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Courier New', monospace;
+                background-color: #8cbdbf;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-image:
+                    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+                    url('data:image/svg+xml;utf8,<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" fill="%23507c32"/><rect width="32" height="32" x="32" y="32" fill="%23507c32"/><rect width="32" height="32" x="32" fill="%236a9e3d"/><rect width="32" height="32" y="32" fill="%236a9e3d"/></svg>');
+                background-size: 64px 64px;
+            }
+
+            .login-container {
+                width: 350px;
+                background-color: #826a4a;
+                border: 6px solid #5d4a36;
+                box-shadow: 0 0 0 4px #c6c6c6, 0 0 30px rgba(0, 0, 0, 0.5);
+                position: relative;
+            }
+
+            .login-header {
+                background-color: #5d4a36;
+                padding: 12px;
+                text-align: center;
+                font-size: 24px;
+                color: white;
+                font-weight: bold;
+                text-shadow: 2px 2px #000;
+                border-bottom: 4px solid #3e3026;
+            }
+
+            .login-form {
+                padding: 20px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            label {
+                display: block;
+                margin-bottom: 5px;
+                color: white;
+                font-weight: bold;
+                text-shadow: 1px 1px #000;
+            }
+
+            input {
+                width: 100%;
+                padding: 8px;
+                box-sizing: border-box;
+                border: 4px solid #5d4a36;
+                background-color: #c6c6c6;
+                font-family: 'Courier New', monospace;
+                font-size: 16px;
+            }
+
+            input:focus {
+                outline: none;
+                border-color: #3e3026;
+                background-color: #ffffff;
+            }
+
+            .login-button {
+                background-color: #507c32;
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                font-size: 16px;
+                cursor: pointer;
+                width: 100%;
+                border: 4px solid #3e5923;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin-top: 10px;
+                text-shadow: 1px 1px #000;
+                transition: background-color 0.2s;
+            }
+
+            .login-button:hover {
+                background-color: #6a9e3d;
+            }
+
+            .login-button:active {
+                background-color: #3e5923;
+                transform: translateY(2px);
+            }
+
+            .decoration {
+                position: absolute;
+                width: 30px;
+                height: 30px;
+            }
+
+            .dirt {
+                background-color: #826a4a;
+                border: 2px solid #5d4a36;
+            }
+
+            .grass {
+                background-color: #507c32;
+                border: 2px solid #3e5923;
+            }
+
+            .stone {
+                background-color: #8e8e8e;
+                border: 2px solid #5d5d5d;
+            }
+
+            .diamond {
+                background-color: #05668d;
+                border: 2px solid #00486c;
+            }
+
+            .message {
+                text-align: center;
+                color: white;
+                font-weight: bold;
+                margin-top: 10px;
+                padding: 8px;
+                border: 2px solid #5d4a36;
+                background-color: rgba(0, 0, 0, 0.3);
+                display: none;
+            }
+
+            .character {
+                width: 60px;
+                height: 120px;
+                position: absolute;
+                left: -100px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            .character-head {
+                width: 40px;
+                height: 40px;
+                background-color: #ffccaa;
+                position: absolute;
+                top: 0;
+                left: 10px;
+            }
+
+            .character-body {
+                width: 40px;
+                height: 50px;
+                background-color: #3d8eb9;
+                position: absolute;
+                top: 40px;
+                left: 10px;
+            }
+
+            .character-legs {
+                width: 15px;
+                height: 30px;
+                position: absolute;
+                top: 90px;
+                background-color: #224466;
+            }
+
+            .character-leg-left {
+                left: 10px;
+            }
+
+            .character-leg-right {
+                left: 35px;
+            }
+
+            .character-arm {
+                width: 10px;
+                height: 40px;
+                background-color: #ffccaa;
+                position: absolute;
+                top: 45px;
+            }
+
+            .character-arm-left {
+                left: 0;
+            }
+
+            .character-arm-right {
+                right: 0;
+            }
+        </style>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+        <script defer src="js/firebase.js" ></script>
+        <script defer src="js/realtime.js" ></script>
+        <script defer src="js/firestore.js"></script>
+        <script defer src="js/authExist.js"></script>
+    </head>
+
+    <body>
+        <div class="login-container">
+            <div class="login-header">UNIRME A PARTIDA</div>
+
+            <div class="character">
+                <div class="character-head"></div>
+                <div class="character-body"></div>
+                <div class="character-arm character-arm-left"></div>
+                <div class="character-arm character-arm-right"></div>
+                <div class="character-legs character-leg-left"></div>
+                <div class="character-legs character-leg-right"></div>
+            </div>
+
+            <!-- Decorative blocks -->
+            <div class="decoration dirt" style="top: -20px; right: -20px;"></div>
+            <div class="decoration grass" style="bottom: -20px; left: -20px;"></div>
+            <div class="decoration stone" style="top: -20px; left: -20px;"></div>
+            <div class="decoration diamond" style="bottom: -20px; right: -20px;"></div>
+
+            <div class="login-form">
+                <div class="form-group">
+                    <label for="username">INGRESAR CÓDIGO DE PARTIDA:</label>
+                    <input type="text" id="username" name="username">
+                </div>
+
+                <button class="login-button" id="login-btn">UNIRME A LA PARTIDA</button>
+
+
+                <div class="message" id="message">
+                </div>
+            </div>
+
+            <div id="message-loading" style="display: none; text-align: center; color: white; font-weight: bold; margin-top: 10px; padding: 8px; border: 2px solid #5d4a36; background-color: rgba(0, 180, 0, 0.7); margin: 20px; padding: 20px;">
+                <p></p>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const loginBtn = document.getElementById('login-btn');
+                const usernameInput = document.getElementById('username');
+                const messageDiv = document.getElementById('message');
+                const character = document.querySelector('.character');
+
+                let partidaId;
+
+                // Character animation
+                setTimeout(() => {
+                    character.style.left = '-70px';
+                    character.style.transition = 'left 2s ease-in-out';
+                }, 500);
+
+                if(localStorage.getItem('partidaId')) {
+                    existePartidaLocalStorage();
+                }
+
+                async function existePartidaLocalStorage(){
+                    partidaId = localStorage.getItem('partidaId');
+                    const existPartida = await existePartida(partidaId);
+
+                    if(existPartida.exists()){
+                        const partida = localStorage.getItem('numJugador');
+                        document.querySelector('.login-form').style.display = 'none';
+                        document.getElementById('message-loading').style.display = 'block';
+                        document.querySelector('#message-loading p').textContent = `Usted es el jugador número ${partida}, espere a que inicien la partida...`;
+                        esperarIniciarPartida(partidaId);
+                    }else{
+                        localStorage.removeItem('partidaId');
+                        localStorage.removeItem('numJugador');
+                        localStorage.removeItem('preguntas');
+                    }
+                }
+
+                loginBtn.addEventListener('click', async() => {
+                    partidaId = usernameInput.value.trim();
+                    
+                    if (partidaId === '') {
+                        showMessage('El código de la partida es necesario', 'error');
+                        return;
+                    }
+
+                    try{
+                        const partida = await unirseAPartida(partidaId);
+
+                        document.querySelector('.login-form').style.display = 'none';
+                        document.getElementById('message-loading').style.display = 'block';
+                        document.querySelector('#message-loading p').textContent = `Usted es el jugador número ${partida}, espere a que inicien la partida...`;
+
+                        esperarIniciarPartida(partidaId);
+                    } catch (error) {
+                        showMessage(error.message, 'error');
+                    }
+                });
+
+                function esperarIniciarPartida(partidaId){
+                    const partidaRef = db.ref('partidas/' + partidaId);
+
+                    partidaRef.child('estado').on('value', (snapshot) => {
+                        const estado = snapshot.val();
+
+                        if (estado === 'iniciada') {
+                            document.querySelector('#message-loading p').textContent = 'La partida ha iniciado, redirigiendo...';
+                            setTimeout(() => {
+                                window.location.href = '/pages/cuestionario';
+                            }, 2000);
+                        }
+                    });
+                }
+
+                function showMessage(msg, type) {
+                    messageDiv.textContent = msg;
+                    messageDiv.style.display = 'block';
+
+                    if (type === 'error') {
+                        messageDiv.style.backgroundColor = 'rgba(180, 0, 0, 0.7)';
+                    } else {
+                        messageDiv.style.backgroundColor = 'rgba(0, 180, 0, 0.7)';
+                    }
+
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000);
+                }
+
+                // Add some interactive elements
+                document.querySelectorAll('.decoration').forEach(block => {
+                    block.addEventListener('click', function () {
+                        this.style.transform = 'scale(0.8)';
+                        setTimeout(() => {
+                            this.style.transform = 'scale(1)';
+                        }, 200);
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>

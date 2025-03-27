@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Minecraft Quiz</title>
+        <style>
+            @font-face {
+                font-family: 'MinecraftFont';
+                src: url('https://cdnjs.cloudflare.com/ajax/libs/font-minecraft/1.0/MinecraftTen-VGORe.ttf') format('truetype');
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Courier New', monospace;
+                background-color: #8cbdbf;
+                overflow: hidden;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                background-image:
+                    linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)),
+                    url('data:image/svg+xml;utf8,<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg"><rect width="32" height="32" fill="%23507c32"/><rect width="32" height="32" x="32" y="32" fill="%23507c32"/><rect width="32" height="32" x="32" fill="%236a9e3d"/><rect width="32" height="32" y="32" fill="%236a9e3d"/></svg>');
+                background-size: 64px 64px;
+            }
+
+            .container {
+                width: 90%;
+                max-width: 600px;
+                background-color: #8B8B8B;
+                border: 4px solid #373737;
+                padding: 20px;
+                box-shadow: 0 0 0 4px #c6c6c6;
+                position: relative;
+            }
+
+            .container::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.1);
+                pointer-events: none;
+                z-index: 1;
+            }
+
+            h1 {
+                text-align: center;
+                color: #FFFF55;
+                text-shadow: 2px 2px #3F3F00;
+                font-size: 2.5em;
+                margin-top: 0;
+                margin-bottom: 20px;
+            }
+
+            .question-container {
+                background-color: #C6C6C6;
+                border: 3px solid #555555;
+                padding: 15px;
+                margin-bottom: 20px;
+                position: relative;
+            }
+
+            .question {
+                font-size: 1.3em;
+                color: #333;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+
+            .options {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .option {
+                background-color: #6B6B6B;
+                border: 3px outset #8B8B8B;
+                padding: 10px;
+                text-align: center;
+                color: white;
+                font-size: 1.1em;
+                cursor: pointer;
+                transition: all 0.1s;
+                user-select: none;
+            }
+
+            .option:hover {
+                background-color: #747474;
+                transform: translateY(-2px);
+            }
+
+            .option:active {
+                border-style: inset;
+                transform: translateY(2px);
+            }
+
+            .option.correct {
+                background-color: #55AA55;
+                border-color: #3F8B3F;
+            }
+
+            .option.incorrect {
+                background-color: #AA5555;
+                border-color: #8B3F3F;
+            }
+
+            .message {
+                text-align: center;
+                font-size: 1.2em;
+                color: #FFFF55;
+                text-shadow: 1px 1px #3F3F00;
+                height: 30px;
+                margin-top: 10px;
+            }
+
+            .progress {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 20px;
+            }
+
+            .progress-label {
+                color: white;
+                font-size: 1.1em;
+            }
+
+            .progress-bar {
+                height: 20px;
+                background-color: #555555;
+                margin-top: 5px;
+                border: 2px solid #373737;
+                position: relative;
+            }
+
+            .progress-fill {
+                height: 100%;
+                background-color: #55AA55;
+                width: 0%;
+                transition: width 0.5s;
+            }
+
+            .completion-message {
+                text-align: center;
+                font-size: 1.5em;
+                color: #FFFF55;
+                text-shadow: 2px 2px #3F3F00;
+                margin: 20px 0;
+                display: none;
+            }
+
+            @media (max-width: 600px) {
+                .options {
+                    grid-template-columns: 1fr;
+                }
+            }
+
+            /* Pixel-art styling */
+            * {
+                image-rendering: pixelated;
+                box-sizing: border-box;
+            }
+
+            /* Sound controls */
+            .sound-controls {
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                color: white;
+                cursor: pointer;
+                font-size: 1.2em;
+                z-index: 2;
+            }
+        </style>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+        <script defer src="../../js/firebase.js" ></script>
+        <script defer src="../../js/realtime.js" ></script>
+        <script defer src="../../js/authExist.js"></script>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="sound-controls" id="soundToggle">🔊</div>
+            <h1>Cuestionario</h1>
+
+            <h3 style="color: white;">Eres el jugador número: <span id="numJugador"></span></h3>
+            <div class="question-container">
+                <div class="question" id="question"></div>
+                <div class="options" id="options"></div>
+            </div>
+
+            <div class="message" id="message"></div>
+
+            <div class="progress">
+                <div class="progress-label">Progreso: <span id="progress-text">0/0</span></div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+
+            <div class="completion-message" id="completion">
+                ¡Completaste el cuestionario!<br>
+                ¡Felicidades!
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                // Sample data - in a real application, this would be provided externally
+                let questionOrder;
+                let originalQuestionCount;
+                let answeredCorrectly = 0;
+                let questions;
+                let numJugador;
+                let partidaId;
+                let estadoPartida = true;
+
+                if(localStorage.getItem('preguntas')){
+                    existePartidaLocalStorage();
+                }else{
+                    window.location.href = '/';
+                }
+
+                async function existePartidaLocalStorage(){
+                    partidaId = localStorage.getItem('partidaId');
+                    numJugador = localStorage.getItem('numJugador');
+                    document.getElementById('numJugador').textContent = numJugador;
+
+                    questions = JSON.parse(localStorage.getItem('preguntas'));
+                    questionOrder = questions.map((_, index) => index);
+                    originalQuestionCount = questions.length;
+
+                    const existPartida = await existePartida(partidaId);
+                    escucharEstadoPartida();
+
+                    if(existPartida.exists() && existPartida.val().jugadores !== undefined && existPartida.val().jugadores['jugador' + numJugador] !== undefined){
+                        if(localStorage.getItem('questionOrder')){
+                            questionOrder = JSON.parse(localStorage.getItem('questionOrder'));
+                            answeredCorrectly = questions.length - questionOrder.length;
+                        }
+                        updateProgress();
+                        showQuestion();
+                    }else{
+                        localStorage.removeItem('partidaId');
+                        localStorage.removeItem('numJugador');
+                        localStorage.removeItem('preguntas');
+                        localStorage.removeItem('questionOrder');
+                        window.location.href = '/';
+                    }
+                }
+
+                // Sound effects
+                const sounds = {
+                    click: new Audio('data:audio/wav;base64,UklGRnwAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YVgAAABwAI4AmQCEAFcANQAxADYARQBVAGQAcQB8AIIAhgCHAIQAfwB4AGwAYABSAEYAOwAxACcAHwAYABEACwAFAP//+v/2//P/8v/2//n//f8BAAIABQAJAA=='),
+                    correct: new Audio('data:audio/wav;base64,UklGRlQBAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YTABAAAAAAAAAP8/Xj/3P3U/ZD6OPpE+pz5MPjI9zD2/PSI+fj7OPac9JDzfO6s8hD2mPsg+sD7YPdY8kDsMO4g6LzoEOkg73zusPC49Bj2gPBc82TvtO+w7vDufO787HjyOPPA8XD26PeU9Bj4ePiA+ID4ePho+Fj4TPg8+Cj4FPgE+/D3vPbw9pj2NPXk9ZT1RPTU9Gz0BPSY9Oz1QPVQ9WD10PZg9uD3YPfg9Hj48Plk+dz6fPsw+8T4HPjo+Xj57PpY+sj7OPuo+AD8YPy8/QD9PP2g/eT+IP5c/pj+pP50/fD9eP0c/KT8EP9U+qD6GPmY+JT5i/9z/cv8Q/7P+W/4I/rX9Zf0Q/cb8f/w//P37vvt9+0H7CPvN+pz6bvpC+hj67vnG+Z/5efla+Tz5'),
+                    incorrect: new Audio('data:audio/wav;base64,UklGRoABAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YVwBAAAAMy07AAAA9v42AAAA6g8UAAAA1AETAAAA0f0MAAAA4fgJAAAA3/oHAAAA5PkHAAAA8fUJAAAA8fEIAAAA+e8HAAAA/e4HAAAAAAYPAAAAAwYQAAAABgkQAAAABwsQAAAA/gsKAAAA+g0QAAAAAgkHAAAA+ggKAAAA+Q0FAAAA+xANAAAA/QoJAAAAAgsMAAAA/g4MAAAA/A8LAAAA9wsJAAAA9QsIAAAA+Q0HAAAA/Q4EAAAA/w4CAAAA/w3+/////Av+/////Qr+//////8L/v////8MC//////9DAD/////+w0A/////vsM/v////r7DP7////8/Av////////9C/////////0L/////////QkA////////CQAAAP////8CAAAA/////wEAAAD/////AAAAAAAAAP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==')
+                };
+
+                let soundEnabled = true;
+
+                // Elements
+                const questionElement = document.getElementById('question');
+                const optionsElement = document.getElementById('options');
+                const messageElement = document.getElementById('message');
+                const progressText = document.getElementById('progress-text');
+                const progressFill = document.getElementById('progress-fill');
+                const completionMessage = document.getElementById('completion');
+                const soundToggle = document.getElementById('soundToggle');
+
+                // Sound toggle
+                soundToggle.addEventListener('click', function () {
+                    soundEnabled = !soundEnabled;
+                    soundToggle.textContent = soundEnabled ? '🔊' : '🔈';
+                    playSound('click');
+                });
+
+                function escucharEstadoPartida(){
+                    const partidaRef = db.ref('partidas/' + partidaId);
+
+                    partidaRef.child('estado').on('value', (snapshot) => {
+                        const estado = snapshot.val();
+                        if(estado === 'finalizada'){
+                            estadoPartida = false;
+                            setTimeout(() => {
+                                completionMessage.style.display = 'block';
+                                completionMessage.textContent = '¡Ya tenemos un ganador, ve la pantalla principal para ver el resultado!';
+                            }, 2000);
+                        }
+
+                        if(estado === 'eliminar'){
+                            completionMessage.textContent = '¡Partida finalizada!';
+                            setTimeout(() => {
+                                localStorage.removeItem('partidaId');
+                                localStorage.removeItem('numJugador');
+                                localStorage.removeItem('preguntas');
+                                localStorage.removeItem('questionOrder');
+                                window.location.href = '/';
+                            }, 1500);
+                        }
+                    });
+                }
+
+                // Show current question
+                function showQuestion() {
+                    if (questionOrder.length === 0) {
+                        questionElement.parentElement.style.display = 'none';
+                        completionMessage.style.display = 'block';
+                        return;
+                    }
+
+                    const currentQuestionId = questionOrder[0];
+                    const currentQuestion = questions[currentQuestionId];
+                    questionElement.textContent = currentQuestion.pregunta;
+
+                    optionsElement.innerHTML = '';
+                    currentQuestion.opciones.forEach(option => {
+                        const optionElement = document.createElement('div');
+                        optionElement.classList.add('option');
+                        optionElement.textContent = option;
+                        optionElement.addEventListener('click', () => checkAnswer(option));
+                        optionsElement.appendChild(optionElement);
+                    });
+                }
+
+                // Check answer
+                function checkAnswer(selectedOption) {
+                    if(!estadoPartida){
+                        return;
+                    }
+
+                    playSound('click');
+
+                    const currentQuestionId = questionOrder[0];
+                    const currentQuestion = questions[currentQuestionId];
+
+                    if (selectedOption === currentQuestion.respuesta) {
+                        // Correct answer
+                        messageElement.textContent = '¡Correcto!';
+                        messageElement.style.color = '#55FF55';
+                        playSound('correct');
+
+                        // Remove from array
+                        questionOrder.shift();
+                        localStorage.setItem('questionOrder', JSON.stringify(questionOrder));
+                        answeredCorrectly++;
+
+                        db.ref('partidas/' + partidaId + '/jugadores/' + 'jugador' + numJugador).update({
+                            preguntas: questionOrder.length
+                        });
+
+                        // Show next question after a brief delay
+                        setTimeout(() => {
+                            messageElement.textContent = '';
+                            showQuestion();
+                            updateProgress();
+                        }, 1000);
+                    } else {
+                        // Incorrect answer
+                        messageElement.textContent = '¡Incorrecto. Intentalo más tarde!';
+                        messageElement.style.color = '#FF5555';
+                        playSound('incorrect');
+
+                        // Move to end of array
+                        const removedQuestion = questionOrder.shift();
+                        questionOrder.push(removedQuestion);
+
+                        // Show next question after a brief delay
+                        setTimeout(() => {
+                            messageElement.textContent = '';
+                            showQuestion();
+                            updateProgress();
+                        }, 1000);
+                    }
+                }
+
+                // Update progress display
+                function updateProgress() {
+                    progressText.textContent = `${answeredCorrectly}/${originalQuestionCount}`;
+                    const progressPercentage = (answeredCorrectly / originalQuestionCount) * 100;
+                    progressFill.style.width = `${progressPercentage}%`;
+                }
+
+                // Play sound effect
+                function playSound(soundName) {
+                    if (soundEnabled && sounds[soundName]) {
+                        // Clone and play to allow for overlapping sounds
+                        const sound = sounds[soundName].cloneNode();
+                        sound.volume = 0.3;
+                        sound.play();
+                    }
+                }
+            });
+        </script>
+    </body>
+</html>

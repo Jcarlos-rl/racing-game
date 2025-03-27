@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Carrera | Seguimiento de carrera</title>
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+                font-family: 'Courier New', monospace;
+                background-color: #8cbdbf;
+                overflow: hidden;
+            }
+
+            .game-container {
+                width: 100vw;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .controls {
+                width: 80%;
+                max-width: 800px;
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 20px;
+                background-color: #826a4a;
+                padding: 10px;
+                border: 4px solid #5d4a36;
+            }
+
+            .track-container {
+                width: 80%;
+                max-width: 800px;
+                height: 500px;
+                position: relative;
+                background-color: #8e8e8e;
+                /* Stone gray */
+                border: 4px solid #5d4a36;
+                overflow: hidden;
+            }
+
+            .sky {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 30%;
+                background-color: #8cbdbf;
+                z-index: 1;
+            }
+
+            .sun {
+                position: absolute;
+                top: 30px;
+                right: 50px;
+                width: 60px;
+                height: 60px;
+                background-color: #fff45e;
+                box-shadow: 0 0 20px #fff45e;
+                z-index: 2;
+            }
+
+            .clouds {
+                position: absolute;
+                width: 100%;
+                height: 30%;
+                z-index: 3;
+            }
+
+            .cloud {
+                position: absolute;
+                background-color: white;
+                z-index: 3;
+            }
+
+            .cloud1 {
+                width: 80px;
+                height: 30px;
+                top: 40px;
+                left: 100px;
+            }
+
+            .cloud2 {
+                width: 100px;
+                height: 25px;
+                top: 60px;
+                left: 400px;
+            }
+
+            .cloud3 {
+                width: 70px;
+                height: 20px;
+                top: 30px;
+                left: 600px;
+            }
+
+            .ground {
+                position: absolute;
+                bottom: 0;
+                width: 100%;
+                height: 70%;
+                background-color: #8e8e8e;
+                /* Stone gray */
+                display: flex;
+                flex-direction: column;
+                z-index: 4;
+            }
+
+            .lane {
+                height: 25%;
+                width: 100%;
+                position: relative;
+                border-bottom: 2px solid #5d5d5d;
+                display: flex;
+                align-items: center;
+            }
+
+            .lane:last-child {
+                border-bottom: none;
+            }
+
+            .start-line,
+            .finish-line {
+                position: absolute;
+                height: 100%;
+                width: 10px;
+                z-index: 5;
+            }
+
+            .start-line {
+                left: 50px;
+                background: repeating-linear-gradient(to bottom,
+                        white 0px,
+                        white 15px,
+                        black 15px,
+                        black 30px);
+            }
+
+            .finish-line {
+                right: 50px;
+                background: repeating-linear-gradient(to bottom,
+                        black 0px,
+                        black 15px,
+                        white 15px,
+                        white 30px);
+            }
+
+            .player {
+                position: absolute;
+                width: 30px;
+                height: 60px;
+                left: 60px;
+                transform: translateY(-50%);
+                transition: left 0.5s linear;
+                z-index: 6;
+            }
+
+            .player-body {
+                width: 20px;
+                height: 30px;
+                background-color: #3d8eb9;
+                position: absolute;
+                top: 15px;
+                left: 5px;
+            }
+
+            .player-head {
+                width: 20px;
+                height: 20px;
+                background-color: #ffccaa;
+                position: absolute;
+                top: 0;
+                left: 5px;
+            }
+
+            .player-legs {
+                width: 8px;
+                height: 15px;
+                position: absolute;
+                top: 45px;
+            }
+
+            .player-leg-left {
+                background-color: #224466;
+                left: 5px;
+            }
+
+            .player-leg-right {
+                background-color: #224466;
+                left: 17px;
+            }
+
+            .player-arm {
+                width: 5px;
+                height: 20px;
+                background-color: #ffccaa;
+                position: absolute;
+                top: 20px;
+            }
+
+            .player-arm-left {
+                left: 0;
+            }
+
+            .player-arm-right {
+                right: 0;
+            }
+
+            .player.player1 .player-body {
+                background-color: #3d8eb9;
+            }
+
+            .player.player2 .player-body {
+                background-color: #aa3333;
+            }
+
+            .player.player3 .player-body {
+                background-color: #33aa33;
+            }
+
+            .player.player4 .player-body {
+                background-color: #aa33aa;
+            }
+
+            .pixel {
+                position: absolute;
+                width: 5px;
+                height: 5px;
+                background-color: #3d5812;
+            }
+
+            button {
+                padding: 10px 15px;
+                background-color: #b5774b;
+                border: 3px solid #8b5b36;
+                color: white;
+                font-family: 'Courier New', monospace;
+                font-weight: bold;
+                font-size: 16px;
+                cursor: pointer;
+                text-transform: uppercase;
+            }
+
+            button:hover {
+                background-color: #c68c61;
+            }
+
+            .player-config {
+                display: flex;
+                gap: 10px;
+            }
+
+            .score-board {
+                width: 80%;
+                max-width: 800px;
+                background-color: #826a4a;
+                border: 4px solid #5d4a36;
+                padding: 10px;
+                margin-top: 20px;
+                color: white;
+                font-weight: bold;
+            }
+
+            .winner-message {
+                color: #ffff00;
+                font-size: 24px;
+                text-align: center;
+                margin-top: 10px;
+                text-shadow: 2px 2px #000000;
+            }
+
+            .progress-display {
+                display: flex;
+                justify-content: space-between;
+                margin-top: 10px;
+            }
+
+            @keyframes running {
+                0% {
+                    transform: translateY(-50%);
+                }
+
+                25% {
+                    transform: translateY(-55%);
+                }
+
+                50% {
+                    transform: translateY(-50%);
+                }
+
+                75% {
+                    transform: translateY(-45%);
+                }
+
+                100% {
+                    transform: translateY(-50%);
+                }
+            }
+
+            .running {
+                animation: running 0.5s infinite;
+            }
+        </style>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+        <script defer src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+        <script defer src="../../js/firebase.js"></script>
+        <script defer src="../../js/authNotExist.js"></script>
+        <script defer src="../../js/realtime.js"></script>
+        <script defer src="../../js/firestore.js"></script>
+    </head>
+
+    <body>
+        <div id="create-game" style="margin-top: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <button>Crear partida</button>
+            <p style="font-size: 50px; display: none; font-weight: bold;">Código partida: <span style="color: white; font-weight: normal;"></span></p>
+        </div>
+        <div id="game-container" style="display: none;">
+        <!-- <div id="game-container"> -->
+            <div class="game-container">
+                <h1>Seguimiento de carrera</h1>
+
+                <div class="controls">
+                    <div class="player-config">
+                        <p id="player-count" style="color: white;">Jugadores: <span style="font-weight: bold; font-size: 20px;">0</span></p>
+                    </div>
+
+                    <button id="start-button">Iniciar carrera</button>
+                    <button id="reset-button" style="display: none;">Finalizar carrera</button>
+                </div>
+
+                <div class="track-container">
+                    <div class="sky">
+                        <div class="sun"></div>
+                        <div class="clouds">
+                            <div class="cloud cloud1"></div>
+                            <div class="cloud cloud2"></div>
+                            <div class="cloud cloud3"></div>
+                        </div>
+                    </div>
+
+                    <div class="ground">
+                        <div class="lane lane1">
+                            <div class="start-line"></div>
+                            <div class="finish-line"></div>
+                            <div class="player player1">
+                                <div class="player-head"></div>
+                                <div class="player-body"></div>
+                                <div class="player-arm player-arm-left"></div>
+                                <div class="player-arm player-arm-right"></div>
+                                <div class="player-legs player-leg-left"></div>
+                                <div class="player-legs player-leg-right"></div>
+                            </div>
+                        </div>
+                        <div class="lane lane2">
+                            <div class="start-line"></div>
+                            <div class="finish-line"></div>
+                            <div class="player player2">
+                                <div class="player-head"></div>
+                                <div class="player-body"></div>
+                                <div class="player-arm player-arm-left"></div>
+                                <div class="player-arm player-arm-right"></div>
+                                <div class="player-legs player-leg-left"></div>
+                                <div class="player-legs player-leg-right"></div>
+                            </div>
+                        </div>
+                        <div class="lane lane3">
+                            <div class="start-line"></div>
+                            <div class="finish-line"></div>
+                            <div class="player player3">
+                                <div class="player-head"></div>
+                                <div class="player-body"></div>
+                                <div class="player-arm player-arm-left"></div>
+                                <div class="player-arm player-arm-right"></div>
+                                <div class="player-legs player-leg-left"></div>
+                                <div class="player-legs player-leg-right"></div>
+                            </div>
+                        </div>
+                        <div class="lane lane4">
+                            <div class="start-line"></div>
+                            <div class="finish-line"></div>
+                            <div class="player player4">
+                                <div class="player-head"></div>
+                                <div class="player-body"></div>
+                                <div class="player-arm player-arm-left"></div>
+                                <div class="player-arm player-arm-right"></div>
+                                <div class="player-legs player-leg-left"></div>
+                                <div class="player-legs player-leg-right"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="score-board">
+                    <h3>Progreso de la carrera</h3>
+                    <div class="progress-display">
+                        <div id="player1-container">Jugador 1: <span id="player1-progress">0</span>%</div>
+                        <div id="player2-container">Jugador 2: <span id="player2-progress">0</span>%</div>
+                        <div id="player3-container">Jugador 3: <span id="player3-progress">0</span>%</div>
+                        <div id="player4-container">Jugador 4: <span id="player4-progress">0</span>%</div>
+                    </div>
+                    <div class="winner-message" id="winner-message"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+
+                // Game elements
+                const startButton = document.getElementById('start-button');
+                const resetButton = document.getElementById('reset-button');
+                const players = document.querySelectorAll('.player');
+                const winnerMessage = document.getElementById('winner-message');
+                const player1Container = document.getElementById('player1-container');
+                const player2Container = document.getElementById('player2-container');
+                const player3Container = document.getElementById('player3-container');
+                const player4Container = document.getElementById('player4-container');
+
+                // Game state
+                let isRacing = false;
+                let playerPositions = [0, 0, 0, 0];
+                let playerSpeeds = [0, 0, 0, 0];
+                let raceInterval;
+                let activePlayerCount = 0;
+                let partidaId;
+                let preguntas;
+                let porcentajePorPregunta;
+
+                if(localStorage.getItem('partidaId')) {
+                    existePartidaLocalStorage();
+                }
+
+                async function existePartidaLocalStorage(){
+                    partidaId = localStorage.getItem('partidaId');
+                    preguntas = parseInt(localStorage.getItem('preguntas')) || null; 
+                    porcentajePorPregunta = parseFloat(localStorage.getItem('porcentajePorPregunta')) || null;
+                    const existPartida = await existePartida(partidaId);
+
+                    if(existPartida.exists()){
+                        activePlayerCount = (existPartida.val().jugadores) ? Object.keys(existPartida.val().jugadores).length : 0;
+                        document.querySelector('#create-game p').style.display = 'block';
+                        document.querySelector('#create-game button').style.display = 'none';
+                        document.querySelector('#create-game p span').textContent = partidaId;
+                        document.querySelector('#game-container').style.display = 'block';
+                        escucharJugadores(partidaId);
+
+                        if(localStorage.getItem('isRacing')){
+                            isRacing = (localStorage.getItem('isRacing') === 'true') ? true : false;
+                            escucharPreguntasResueltas();
+                            const trackWidth = document.querySelector('.track-container').offsetWidth - 150;
+                            for(let key in existPartida.val().jugadores){
+                                let index = key.replace('jugador', '') - 1;
+                                playerPositions[index] =  (preguntas - existPartida.val().jugadores[key].preguntas) * porcentajePorPregunta;
+
+                                const newX = 60 + (trackWidth * playerPositions[index] / 100);
+                                players[index].style.left = newX + 'px';
+
+                                document.getElementById(`player${index + 1}-progress`).textContent = Math.floor(playerPositions[index]);
+                            }
+
+                            if(existPartida.val().estado === 'finalizada'){
+                                startButton.style.display = 'none';
+                                winnerMessage.textContent = `¡Carrera finalizada!`;
+                                setTimeout(() => {
+                                    window.location.href = '/pages/resultado';
+                                }, 2500);
+                            }
+                        }
+                    }else{
+                        localStorage.removeItem('isRacing');
+                        localStorage.removeItem('partidaId');
+                        localStorage.removeItem('preguntas');
+                        localStorage.removeItem('porcentajePorPregunta');
+                    }
+                }
+                
+                document.querySelector('#create-game button').addEventListener('click', async() => {
+
+                    partidaId = await crearPartida();
+
+                    updatePlayerVisibility();
+                    document.querySelector('#create-game p').style.display = 'block';
+                    document.querySelector('#create-game button').style.display = 'none';
+                    document.querySelector('#create-game p span').textContent = partidaId;
+                    document.querySelector('#game-container').style.display = 'block';
+
+                    escucharJugadores(partidaId);
+                });
+
+                function escucharJugadores(partidaID) {
+                    const jugadoredRef = db.ref('partidas/' + partidaID + '/jugadores');
+
+                    jugadoredRef.on('value', (snapshot) => {
+                        const jugadores = snapshot.val() || {};
+                        if((preguntas === undefined || preguntas === null) && Object.keys(jugadores).length > 0){
+                            preguntas = jugadores.jugador1.preguntas;
+                            porcentajePorPregunta = 100 / preguntas;
+                            localStorage.setItem('preguntas', preguntas);
+                            localStorage.setItem('porcentajePorPregunta', porcentajePorPregunta);
+                        }
+
+                        activePlayerCount = Object.keys(jugadores).length;
+                        updatePlayerVisibility();
+                    });
+                }
+
+                // Update player visibility based on count
+                function updatePlayerVisibility() {
+
+                    document.querySelector('#player-count span').textContent = activePlayerCount;
+                    // Show/hide players
+                    for (let i = 0; i < players.length; i++) {
+                        players[i].style.display = i < activePlayerCount ? 'block' : 'none';
+                    }
+
+                    // Show/hide progress indicators
+                    player1Container.style.display = activePlayerCount >= 1 ? 'block' : 'none';
+                    player2Container.style.display = activePlayerCount >= 2 ? 'block' : 'none';
+                    player3Container.style.display = activePlayerCount >= 3 ? 'block' : 'none';
+                    player4Container.style.display = activePlayerCount >= 4 ? 'block' : 'none';
+                }
+
+                // Initialize the race
+                function initializeRace() {
+
+                    if(activePlayerCount < 2){
+                        alert('Deben haber al menos 2 jugadores para iniciar la carrera');
+                        return;
+                    }
+                    
+                    resetRace();
+                    isRacing = true;
+
+                    for (let i = 0; i < activePlayerCount; i++) {
+                        players[i].classList.add('running');
+                    }
+
+                    db.ref('partidas/' + partidaId).update({
+                        estado: 'iniciada'
+                    });
+
+                    document.getElementById('start-button').style.display = 'none';
+                    localStorage.setItem('isRacing', true);
+                    escucharPreguntasResueltas();
+                }
+
+                function escucharPreguntasResueltas(){
+                    const jugadoresRef = db.ref('partidas/' + partidaId + '/jugadores');
+
+                    jugadoresRef.off("child_changed");
+                    jugadoresRef.on('child_changed', (snapshot) => {
+                        const jugadorKey = snapshot.key;
+                        const datos = snapshot.val();
+
+                        if('preguntas' in datos){
+                            jugadorIndex = jugadorKey.replace('jugador', '') - 1;
+                            updateRace(jugadorIndex);
+                        }
+                    });
+                }
+
+                // Update the race progress
+                function updateRace(jugadorIndex) {
+                    if(!isRacing){
+                        return;
+                    }
+
+                    const trackWidth = document.querySelector('.track-container').offsetWidth - 150;
+
+                    if(playerPositions[jugadorIndex] < 100){
+                        playerPositions[jugadorIndex] += porcentajePorPregunta;
+
+                        if(playerPositions[jugadorIndex] > 100){
+                            playerPositions[jugadorIndex] = 100;
+                        }
+
+                        const newX = 60 + (trackWidth * playerPositions[jugadorIndex] / 100);
+                        players[jugadorIndex].style.left = newX + 'px';
+
+                        document.getElementById(`player${jugadorIndex + 1}-progress`).textContent = Math.floor(playerPositions[jugadorIndex]);
+
+                        if (playerPositions[jugadorIndex] >= 100) {
+                            db.ref('partidas/' + partidaId).update({
+                                ganador: jugadorIndex + 1,
+                                estado: 'finalizada'
+                            });
+                            endRace();
+                        }
+                    }
+                }
+
+                // End the race
+                function endRace() {
+                    isRacing = false;
+
+                    // Find the winner
+                    let winnerIndex = 0;
+                    for (let i = 1; i < activePlayerCount; i++) {
+                        if (playerPositions[i] > playerPositions[winnerIndex]) {
+                            winnerIndex = i;
+                        }
+                    }
+
+                    // Display winner message
+                    winnerMessage.textContent = `¡Carrera finalizada!`;
+                    localStorage.setItem('isRacing', false);
+                    setTimeout(() => {
+                        window.location.href = '/pages/resultado';
+                    }, 2500);
+
+                    // Stop running animation
+                    for (let i = 0; i < players.length; i++) {
+                        players[i].classList.remove('running');
+                    }
+                }
+
+                // Reset the race
+                function resetRace() {
+                    isRacing = false;
+                    winnerMessage.textContent = '';
+
+                    // Reset positions
+                    playerPositions = [0, 0, 0, 0];
+
+                    // Reset player positions on screen
+                    for (let i = 0; i < players.length; i++) {
+                        players[i].style.left = '60px';
+                        players[i].classList.remove('running');
+                        document.getElementById(`player${i + 1}-progress`).textContent = '0';
+                    }
+                }
+
+                // Event listeners
+                startButton.addEventListener('click', function () {
+                    initializeRace();
+                });
+            });
+        </script>
+    </body>
+</html>
