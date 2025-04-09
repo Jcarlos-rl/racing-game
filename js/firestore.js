@@ -5,5 +5,5 @@ async function obtenerPreguntasAleatorias() {
     const preguntas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
   
     // Mezclar y seleccionar X preguntas
-    return preguntas.sort(() => 0.5 - Math.random()).slice(0, 5);
+    return preguntas.sort(() => 0.5 - Math.random()).slice(0, 10);
 }
